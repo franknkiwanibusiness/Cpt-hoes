@@ -391,9 +391,8 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
         </div>
     </footer>
 <script type="module">
-    // --- FIREBASE V11 MODULAR IMPORTS ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, push, set, onValue, query, orderByChild, limitToLast, get, remove, increment, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, push, set, onValue, query, orderByChild, get, remove, increment, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -408,7 +407,6 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
     const db = getDatabase(app);
     const IMGUR_CLIENT_ID = "891e5bb4aa94282";
 
-    // --- DEVICE IDENTITY & GLOBALS ---
     let deviceId = localStorage.getItem('cpt_device_id') || ('DEV-' + Math.random().toString(36).substr(2, 9));
     localStorage.setItem('cpt_device_id', deviceId);
 
@@ -416,7 +414,6 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
     const skeletonContainer = document.getElementById('skeleton-container');
     const toastWrapper = document.getElementById('toast-wrapper');
 
-    // --- UI HELPERS ---
     window.notify = (msg, type = 'success') => {
         const t = document.createElement('div');
         t.className = `toast ${type}`;
@@ -429,9 +426,12 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
         document.querySelectorAll('.ios-modal').forEach(m => m.style.display = 'none');
     };
 
-    const openModal = (id) => document.getElementById(id).style.display = 'flex';
+    const openModal = (id) => {
+        const modal = document.getElementById(id);
+        if(modal) modal.style.display = 'flex';
+    };
 
-    // --- TAB NAVIGATION ---
+    // Tab Listeners
     document.getElementById('openPostModal').onclick = () => openModal('postModal');
     document.getElementById('tabReport').onclick = () => openModal('reportModal');
     document.getElementById('tabMessage').onclick = () => openModal('messageModal');
@@ -440,13 +440,11 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
         openModal('manageModal');
     };
 
-    // --- IMAGE PREVIEW LOGIC ---
-    const imgPicker = document.getElementById('imagePicker');
     const fileInput = document.getElementById('fileInput');
     const imgPreview = document.getElementById('imagePreview');
     const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
-    imgPicker.onclick = () => fileInput.click();
+    document.getElementById('imagePicker').onclick = () => fileInput.click();
     fileInput.onchange = (e) => {
         const [file] = e.target.files;
         if (file) {
@@ -456,22 +454,21 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
         }
     };
 
-    // --- POSTING LOGIC (IMGUR + FIREBASE) ---
     document.getElementById('revealForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('submitReveal');
         const file = fileInput.files[0];
-        const name = document.getElementById('targetName').value;
-        const city = document.getElementById('targetCity').value;
-        const desc = document.getElementById('targetDesc').value;
+        const name = document.getElementById('targetName').value.trim();
+        const city = document.getElementById('targetCity').value.trim();
+        const desc = document.getElementById('targetDesc').value.trim();
 
+        if (!file) return notify("Please add a photo", "error");
         if (desc.length < 20) return notify("Description too short!", "error");
         
         btn.disabled = true;
-        btn.innerText = "UPLOADING TO CLOUD...";
+        btn.innerText = "UPLOADING...";
 
         try {
-            // Upload to Imgur
             const formData = new FormData();
             formData.append('image', file);
             const imgRes = await fetch('https://api.imgur.com/3/image', {
@@ -480,16 +477,15 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
                 body: formData
             });
             const imgData = await imgRes.json();
-            const imgUrl = imgData.data.link;
+            if(!imgData.success) throw new Error("Imgur Failed");
 
-            // Save to Firebase (Pending by default)
             const postRef = push(ref(db, 'posts'));
             await set(postRef, {
                 id: postRef.key,
-                name,
+                name: name,
                 location: city,
                 description: desc,
-                imageUrl: imgUrl,
+                imageUrl: imgData.data.link,
                 creatorId: deviceId,
                 approved: false,
                 likes: 0,
@@ -497,63 +493,63 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
                 timestamp: Date.now()
             });
 
-            notify("SUBMITTED FOR REVEAL!");
+            notify("SUBMITTED FOR REVIEW!");
             closeAllModals();
             e.target.reset();
             imgPreview.style.display = 'none';
             uploadPlaceholder.style.display = 'flex';
         } catch (err) {
-            notify("Upload failed. Try again.", "error");
+            notify("Error: " + err.message, "error");
         } finally {
             btn.disabled = false;
             btn.innerText = "SUBMIT FOR REVIEW";
         }
     };
 
-    // --- FEED RENDERING (LAZY LOAD / INFINITE SCROLL) ---
     const renderFeed = () => {
-        const postsQuery = query(ref(db, 'posts'), orderByChild('timestamp'));
-        
-        onValue(postsQuery, (snapshot) => {
-            skeletonContainer.style.display = 'none';
+        const postsRef = ref(db, 'posts');
+        onValue(postsRef, (snapshot) => {
+            if (skeletonContainer) skeletonContainer.style.display = 'none';
             feedContainer.innerHTML = "";
+            
             const data = snapshot.val();
-            if (!data) return;
+            if (!data) {
+                feedContainer.innerHTML = "<p style='text-align:center; padding:50px; color:#8e8e93;'>NO REVEALS YET</p>";
+                return;
+            }
 
             const urlParams = new URLSearchParams(window.location.search);
             const sharedId = urlParams.get('id');
 
-            // Sort posts: Shared ID first, then newest first
-            const posts = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
+            // Convert to array and filter out nulls/undefineds
+            const posts = Object.values(data).filter(p => p && p.id).sort((a, b) => b.timestamp - a.timestamp);
 
             posts.forEach(post => {
                 // Filter: Only show approved OR the user's own pending post
-                if (!post.approved && post.creatorId !== deviceId) return;
+                const isOwner = post.creatorId === deviceId;
+                if (!post.approved && !isOwner) return;
 
                 const card = document.createElement('div');
                 card.className = `post-card ${!post.approved ? 'pending' : ''}`;
-                if (sharedId === post.id) card.style.borderColor = "var(--orange)";
+                if (sharedId === post.id) card.style.border = "3px solid var(--orange)";
 
                 card.innerHTML = `
                     <div class="post-img-wrap">
-                        <img src="${post.imageUrl}" class="post-img" loading="lazy">
+                        <img src="${post.imageUrl}" class="post-img" onerror="this.src='https://via.placeholder.com/400x400?text=Image+Error'">
                     </div>
                     <div class="post-info">
-                        <span class="post-meta">📍 ${post.location} • ID: ${post.id}</span>
-                        <h2>${post.name}</h2>
+                        <span class="post-meta">📍 ${post.location || 'Unknown'} • ID: ${post.id}</span>
+                        <h2 style="text-transform:uppercase;">${post.name || 'Anonymous'}</h2>
                         <p class="post-desc">${post.description}</p>
                         
                         <div style="display:flex; gap:12px; margin-top:20px;">
-                            <button onclick="handleVote('${post.id}', 'likes')" class="ios-post-btn" style="background:#f2f2f7; color:#000; box-shadow:none; padding:8px 12px;">
+                            <button onclick="handleVote('${post.id}', 'likes')" class="ios-post-btn" style="background:#f2f2f7; color:#000; box-shadow:none; padding:8px 12px; border:none;">
                                 👍 ${post.likes || 0}
                             </button>
-                            <button onclick="handleVote('${post.id}', 'dislikes')" class="ios-post-btn" style="background:#f2f2f7; color:#000; box-shadow:none; padding:8px 12px;">
+                            <button onclick="handleVote('${post.id}', 'dislikes')" class="ios-post-btn" style="background:#f2f2f7; color:#000; box-shadow:none; padding:8px 12px; border:none;">
                                 👎 ${post.dislikes || 0}
                             </button>
-                            <button onclick="notify('Comments Coming Soon', 'error')" class="ios-post-btn" style="background:none; color:#8e8e93; box-shadow:none; font-size:0.6rem;">
-                                COMMENTS
-                            </button>
-                            <button onclick="sharePost('${post.id}')" class="ios-post-btn" style="margin-left:auto;">SHARE</button>
+                            <button onclick="sharePost('${post.id}')" class="ios-post-btn" style="margin-left:auto; border:none;">SHARE</button>
                         </div>
                     </div>
                 `;
@@ -562,7 +558,6 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
         });
     };
 
-    // --- REACTION & SHARE LOGIC ---
     window.handleVote = (id, type) => {
         const key = `voted_${id}`;
         if (localStorage.getItem(key)) return notify("Already voted!", "error");
@@ -573,28 +568,31 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
 
     window.sharePost = (id) => {
         const url = `${window.location.origin}${window.location.pathname}?id=${id}`;
-        navigator.clipboard.writeText(url);
-        notify("Link Copied!");
+        if (navigator.share) {
+            navigator.share({ title: 'CPT REVEAL', url: url });
+        } else {
+            navigator.clipboard.writeText(url);
+            notify("Link Copied!");
+        }
     };
 
-    // --- MANAGE MY POSTS ---
     const renderUserPosts = async () => {
         const list = document.getElementById('user-posts-list');
-        list.innerHTML = "Fetching your reveals...";
+        list.innerHTML = "Fetching...";
         const snap = await get(ref(db, 'posts'));
         list.innerHTML = "";
         
         let found = 0;
         if (snap.exists()) {
             Object.values(snap.val()).forEach(p => {
-                if (p.creatorId === deviceId) {
+                if (p && p.creatorId === deviceId) {
                     found++;
                     const item = document.createElement('div');
                     item.style = "background:#F2F2F7; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
                     item.innerHTML = `
                         <div>
-                            <p style="font-weight:900; font-size:0.8rem;">${p.name}</p>
-                            <p style="font-size:0.6rem; color:#8e8e93;">Status: ${p.approved ? 'LIVE' : 'PENDING'}</p>
+                            <p style="font-weight:900; font-size:0.8rem;">${p.name || 'Unnamed'}</p>
+                            <p style="font-size:0.6rem; color:${p.approved ? '#34C759' : '#FF9F43'}; font-weight:900;">${p.approved ? 'LIVE' : 'PENDING'}</p>
                         </div>
                         <button onclick="deletePost('${p.id}')" style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:10px; font-weight:900; font-size:0.6rem;">DELETE</button>
                     `;
@@ -602,38 +600,35 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
                 }
             });
         }
-        if (found === 0) list.innerHTML = "<p style='text-align:center; color:#8e8e93; font-size:0.8rem;'>No posts found from this device.</p>";
+        if (found === 0) list.innerHTML = "<p style='text-align:center; color:#8e8e93; font-size:0.8rem;'>No reveals found.</p>";
     };
 
     window.deletePost = async (id) => {
-        if (confirm("Permanently delete this reveal?")) {
+        if (confirm("Delete this reveal permanently?")) {
             await remove(ref(db, `posts/${id}`));
-            notify("Deleted.");
+            notify("Deleted successfully.");
             renderUserPosts();
         }
     };
 
-    // --- REPORT & MESSAGE ---
     document.getElementById('confirmReport').onclick = async () => {
-        const postId = document.getElementById('reportPostId').value;
-        const reason = document.getElementById('reportReason').value;
-        if (!postId || !reason) return notify("Missing info", "error");
+        const postId = document.getElementById('reportPostId').value.trim();
+        const reason = document.getElementById('reportReason').value.trim();
+        if (!postId || !reason) return notify("Fill all fields", "error");
         await push(ref(db, 'reports'), { postId, reason, deviceId, timestamp: Date.now() });
-        notify("Report sent.");
+        notify("Report submitted.");
         closeAllModals();
     };
 
     document.getElementById('confirmMessage').onclick = async () => {
-        const msg = document.getElementById('adminMessage').value;
+        const msg = document.getElementById('adminMessage').value.trim();
         if (!msg) return notify("Message empty", "error");
         await push(ref(db, 'messages'), { message: msg, deviceId, timestamp: Date.now() });
         notify("Message sent.");
         closeAllModals();
     };
 
-    // Start App
     renderFeed();
-
 </script>
 
 </body>
