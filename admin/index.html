@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CPT ADMIN - God Mode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --card: #1c1c1e;
+            --orange: #FF9F43;
+            --red: #FF3B30;
+            --green: #34C759;
+            --blue: #007AFF;
+            --text-dim: #8E8E93;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; text-transform: uppercase; -webkit-user-select: none; user-select: none; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding-bottom: 100px; }
+        
+        /* --- HEADER --- */
+        header { 
+            position: sticky; top: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); 
+            padding: 20px; z-index: 1000; border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* --- STATS --- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 15px; }
+        .stat-box { background: var(--card); padding: 15px; border-radius: 20px; text-align: center; border: 1px solid #333; }
+        .stat-val { font-size: 1.2rem; font-weight: 900; display: block; }
+        .stat-lbl { font-size: 0.5rem; color: var(--text-dim); font-weight: 800; }
+
+        /* --- NAV --- */
+        .admin-nav { display: flex; gap: 10px; padding: 0 15px 15px; overflow-x: auto; scrollbar-width: none; }
+        .nav-btn { 
+            background: var(--card); color: var(--text-dim); border: none; padding: 10px 20px; 
+            border-radius: 12px; font-weight: 900; font-size: 0.7rem; white-space: nowrap;
+        }
+        .nav-btn.active { background: white; color: black; }
+
+        /* --- CONTENT CARDS --- */
+        .container { padding: 0 15px; }
+        .adm-card { 
+            background: var(--card); border-radius: 24px; padding: 15px; margin-bottom: 15px; 
+            border: 1px solid #333; animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .adm-header { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+        .adm-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+        .adm-meta { flex: 1; }
+        .adm-id { font-size: 0.55rem; color: var(--text-dim); font-weight: 800; }
+        .adm-time { font-size: 0.55rem; color: var(--blue); font-weight: 800; }
+
+        .adm-body { font-size: 0.8rem; color: #EEE; text-transform: none; margin-bottom: 15px; line-height: 1.4; }
+
+        .adm-actions { display: flex; gap: 8px; }
+        .btn { 
+            flex: 1; border: none; padding: 12px; border-radius: 12px; 
+            font-weight: 900; font-size: 0.7rem; cursor: pointer; color: white;
+        }
+        .btn-approve { background: var(--green); }
+        .btn-delete { background: var(--red); }
+        .btn-hide { background: #333; }
+
+        /* --- TOAST --- */
+        #toast { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+            background: var(--blue); padding: 12px 25px; border-radius: 40px; 
+            font-weight: 900; font-size: 0.8rem; display: none; z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast">ACTION SUCCESSFUL</div>
+
+    <header>
+        <h1 style="font-weight: 900; font-size: 1.2rem; letter-spacing: -1px;">GOD MODE 🇿🇦</h1>
+        <div id="online-indicator" style="width: 10px; height: 10px; background: var(--green); border-radius: 50%;"></div>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-box"><span class="stat-val" id="count-pending">0</span><span class="stat-lbl">PENDING</span></div>
+        <div class="stat-box"><span class="stat-val" id="count-reports">0</span><span class="stat-lbl">REPORTS</span></div>
+        <div class="stat-box"><span class="stat-val" id="count-inbox">0</span><span class="stat-lbl">MESSAGES</span></div>
+    </div>
+
+    <nav class="admin-nav">
+        <button class="nav-btn active" onclick="switchTab('POSTS', this)">REVEALS</button>
+        <button class="nav-btn" onclick="switchTab('REPORTS', this)">REPORTS</button>
+        <button class="nav-btn" onclick="switchTab('INBOX', this)">MESSAGES</button>
+    </nav>
+
+    <div class="container" id="admin-content">
+        </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+            projectId: "itzhoyoo-f9f7e",
+            storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let currentTab = 'POSTS';
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
+
+        window.switchTab = (tab, btn) => {
+            currentTab = tab;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadContent();
+        };
+
+        function loadContent() {
+            const container = document.getElementById('admin-content');
+            container.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:50px;">SYNCING DATABASE...</p>`;
+
+            const path = currentTab === 'POSTS' ? 'posts' : (currentTab === 'REPORTS' ? 'reports' : 'messages');
+            
+            onValue(ref(db, path), (snapshot) => {
+                container.innerHTML = "";
+                const data = snapshot.val();
+                if (!data) {
+                    container.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:50px;">NO ${currentTab} FOUND</p>`;
+                    return;
+                }
+
+                Object.values(data).reverse().forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = "adm-card";
+                    const time = new Date(item.timestamp || item.time).toLocaleString();
+
+                    if (currentTab === 'POSTS') {
+                        card.innerHTML = `
+                            <div class="adm-header">
+                                <img src="${item.imageUrl}" class="adm-img">
+                                <div class="adm-meta">
+                                    <h4 style="font-size:0.9rem;">${item.name}</h4>
+                                    <p class="adm-id">DEV: ${item.creatorId}</p>
+                                    <p class="adm-time">${time}</p>
+                                </div>
+                                <div style="background:${item.approved ? 'var(--green)' : 'var(--orange)'}; width:8px; height:8px; border-radius:50%;"></div>
+                            </div>
+                            <p class="adm-body">${item.description}</p>
+                            <div class="adm-actions">
+                                ${!item.approved ? 
+                                    `<button onclick="approvePost('${item.id}')" class="btn btn-approve">APPROVE</button>` : 
+                                    `<button onclick="unapprovePost('${item.id}')" class="btn btn-hide">HIDE</button>`
+                                }
+                                <button onclick="deleteItem('posts', '${item.id}')" class="btn btn-delete">DELETE</button>
+                            </div>
+                        `;
+                    } else if (currentTab === 'REPORTS') {
+                        card.innerHTML = `
+                            <div class="adm-meta">
+                                <p class="adm-id">TARGET POST ID: ${item.postId}</p>
+                                <p class="adm-id">FROM DEV: ${item.deviceId}</p>
+                                <p class="adm-time">${time}</p>
+                            </div>
+                            <p class="adm-body" style="margin-top:10px; color:var(--red);">REASON: ${item.reason}</p>
+                            <div class="adm-actions">
+                                <button onclick="deleteItem('reports', '${item.id || snapshot.key}')" class="btn btn-hide">DISMISS</button>
+                            </div>
+                        `;
+                    } else if (currentTab === 'INBOX') {
+                        card.innerHTML = `
+                            <div class="adm-meta">
+                                <p class="adm-id">FROM DEV: ${item.deviceId}</p>
+                                <p class="adm-time">${time}</p>
+                            </div>
+                            <p class="adm-body" style="margin-top:10px;">${item.message}</p>
+                            <div class="adm-actions">
+                                <button onclick="deleteItem('messages', '${item.id || snapshot.key}')" class="btn btn-hide">ARCHIVE</button>
+                            </div>
+                        `;
+                    }
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        // --- GLOBAL ACTIONS ---
+        window.approvePost = (id) => {
+            update(ref(db, `posts/${id}`), { approved: true });
+            showToast("POST APPROVED");
+        };
+
+        window.unapprovePost = (id) => {
+            update(ref(db, `posts/${id}`), { approved: false });
+            showToast("POST HIDDEN");
+        };
+
+        window.deleteItem = (path, id) => {
+            if (confirm("PERMANENTLY REMOVE THIS?")) {
+                remove(ref(db, `${path}/${id}`));
+                showToast("REMOVED FROM DATABASE");
+            }
+        };
+
+        // --- COUNTER LOGIC ---
+        onValue(ref(db, 'posts'), (s) => {
+            let p = 0;
+            if(s.val()) Object.values(s.val()).forEach(x => { if(!x.approved) p++; });
+            document.getElementById('count-pending').innerText = p;
+        });
+        onValue(ref(db, 'reports'), (s) => {
+            document.getElementById('count-reports').innerText = s.val() ? Object.keys(s.val()).length : 0;
+        });
+        onValue(ref(db, 'messages'), (s) => {
+            document.getElementById('count-inbox').innerText = s.val() ? Object.keys(s.val()).length : 0;
+        });
+
+        // Initial Load
+        loadContent();
+
+    </script>
+</body>
+</html>
