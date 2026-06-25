@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worldwide HTML Pages - Supabase + Firebase</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #eee;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        .auth-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+        }
+        .auth-bar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .auth-bar img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #3a7bd5;
+        }
+        .auth-bar .email-display {
+            font-weight: 500;
+        }
+        .auth-forms {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .auth-forms input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: #eee;
+            font-size: 14px;
+            width: 180px;
+        }
+        .auth-forms input:focus {
+            outline: none;
+            border-color: #00d2ff;
+        }
+        .auth-forms button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .google-btn {
+            background: #4285f4;
+            color: white;
+        }
+        .google-btn:hover { background: #357abd; }
+        .email-btn {
+            background: #3a7bd5;
+            color: white;
+        }
+        .email-btn:hover { background: #2c62b0; }
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            color: #eee;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.2); }
+        .error-msg {
+            color: #f87171;
+            font-size: 0.85em;
+            margin-top: 4px;
+        }
+        .upload-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .upload-section h2 { margin-bottom: 12px; color: #00d2ff; }
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(0,0,0,0.3);
+            color: #eee;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #00d2ff;
+            box-shadow: 0 0 0 3px rgba(0,210,255,0.15);
+        }
+        .upload-btn {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,210,255,0.3);
+        }
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #uploadStatus {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .status-success { color: #4ade80; }
+        .status-error { color: #f87171; }
+        .status-loading { color: #fbbf24; }
+        .pages-section h2 { margin-bottom: 16px; color: #00d2ff; }
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .page-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .page-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+        .page-card iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+            background: white;
+        }
+        .page-card-info {
+            padding: 12px;
+        }
+        .page-card-info .user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .page-card-info .user img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+        .page-card-info .user span {
+            font-size: 0.85em;
+            color: #ccc;
+        }
+        .page-card-info a {
+            color: #00d2ff;
+            text-decoration: none;
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+        .page-card-info a:hover {
+            text-decoration: underline;
+        }
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 1.1em;
+        }
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 14px;
+            height: 280px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Worldwide HTML Pages</h1>
+        <p class="subtitle">Upload HTML → Stored on Supabase → Listed on Firebase → Visible to everyone</p>
+
+        <!-- Auth Bar -->
+        <div class="auth-bar" id="authBar">
+            <!-- User info shown when logged in -->
+            <div class="user-info" id="userInfo" style="display:none;">
+                <img id="userAvatar" src="" alt="avatar">
+                <span class="email-display" id="userEmailDisplay"></span>
+                <button class="logout-btn" onclick="window.signOutUser()">🚪 Sign out</button>
+            </div>
+            <!-- Auth forms shown when logged out -->
+            <div class="auth-forms" id="authForms">
+                <input type="email" id="emailInput" placeholder="Email" autocomplete="email">
+                <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+                <button class="email-btn" onclick="window.signUpWithEmail()">📧 Sign Up</button>
+                <button class="email-btn" onclick="window.signInWithEmail()">🔑 Log In</button>
+                <button class="google-btn" onclick="window.signInWithGoogle()">🔐 Google</button>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="upload-section">
+            <h2>📝 Create a new page</h2>
+            <textarea id="htmlInput" placeholder="Paste your HTML code here..."><h1>Hello World!</h1><p>This is my awesome page. 🌟</p><style>body{font-family:sans-serif;text-align:center;padding:20px;background:#f0f0f0;}</style></textarea>
+            <button class="upload-btn" id="uploadBtn" onclick="window.uploadAndStore()">🚀 Upload & Publish</button>
+            <div id="uploadStatus"></div>
+        </div>
+
+        <!-- Pages list -->
+        <div class="pages-section">
+            <h2>📄 All published pages (real-time)</h2>
+            <div class="pages-grid" id="pagesGrid">
+                <div class="shimmer"></div><div class="shimmer"></div><div class="shimmer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+        import { 
+            getAuth, 
+            signInWithPopup, GoogleAuthProvider, 
+            signInWithEmailAndPassword, createUserWithEmailAndPassword,
+            signOut, onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
+            authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
+            databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
+            projectId: "itzhoyoo-f9f7e",
+            storageBucket: "itzhoyoo-f9f7e.filestorage.app",
+            messagingSenderId: "1094792075584",
+            appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+            measurementId: "G-LLT6F9WRKH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+
+        // ---------- UI helpers ----------
+        function updateUI(user) {
+            currentUser = user;
+            const userInfo = document.getElementById('userInfo');
+            const authForms = document.getElementById('authForms');
+            const userAvatar = document.getElementById('userAvatar');
+            const userEmailDisplay = document.getElementById('userEmailDisplay');
+            const emailInput = document.getElementById('emailInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const htmlInput = document.getElementById('htmlInput');
+
+            if (user) {
+                userInfo.style.display = 'flex';
+                authForms.style.display = 'none';
+                userEmailDisplay.textContent = user.email || user.displayName || 'User';
+                userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'U')}&background=3a7bd5&color=fff&size=36`;
+                // Clear input fields
+                emailInput.value = '';
+                passwordInput.value = '';
+            } else {
+                userInfo.style.display = 'none';
+                authForms.style.display = 'flex';
+            }
+        }
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+        });
+
+        // ---------- Auth functions (exposed to window) ----------
+        window.signInWithGoogle = async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                alert('Google sign in failed: ' + err.message);
+            }
+        };
+
+        window.signUpWithEmail = async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            if (!email || !password) {
+                alert('Please enter email and password.');
+                return;
+            }
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                // UI will update via onAuthStateChanged
+            } catch (err) {
+                alert('Sign up failed: ' + err.message);
+            }
+        };
+
+        window.signInWithEmail = async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            if (!email || !password) {
+                alert('Please enter email and password.');
+                return;
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                alert('Login failed: ' + err.message);
+            }
+        };
+
+        window.signOutUser = async () => {
+            try {
+                await signOut(auth);
+            } catch (err) {
+                console.error('Sign out error:', err);
+            }
+        };
+
+        // ---------- Upload & store ----------
+        window.uploadAndStore = async () => {
+            const htmlInput = document.getElementById('htmlInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const html = htmlInput.value.trim();
+
+            if (!html) {
+                uploadStatus.innerHTML = '<span class="status-error">❌ Please enter some HTML code.</span>';
+                return;
+            }
+            if (!currentUser) {
+                uploadStatus.innerHTML = '<span class="status-error">❌ Please sign in first.</span>';
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            uploadStatus.innerHTML = '<span class="status-loading">⏳ Uploading to Supabase...</span>';
+
+            try {
+                const response = await fetch('/api/storage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ html })
+                });
+
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Upload failed');
+
+                const publicUrl = data.url;
+                uploadStatus.innerHTML = '<span class="status-loading">✅ Uploaded! Saving to Firebase...</span>';
+
+                const pagesRef = ref(db, 'pages');
+                await push(pagesRef, {
+                    url: publicUrl,
+                    userId: currentUser.uid,
+                    userName: currentUser.displayName || currentUser.email || 'Anonymous',
+                    userPhoto: currentUser.photoURL || null,
+                    createdAt: serverTimestamp()
+                });
+
+                uploadStatus.innerHTML = '<span class="status-success">🎉 Published! Your page is now visible worldwide.</span>';
+                htmlInput.value = '';
+
+            } catch (err) {
+                console.error('Upload error:', err);
+                uploadStatus.innerHTML = `<span class="status-error">❌ Error: ${err.message}</span>`;
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        };
+
+        // ---------- Real-time pages feed ----------
+        function loadAllPages() {
+            const pagesGrid = document.getElementById('pagesGrid');
+            const pagesRef = ref(db, 'pages');
+
+            onValue(pagesRef, (snapshot) => {
+                const data = snapshot.val();
+                pagesGrid.innerHTML = '';
+
+                if (!data) {
+                    pagesGrid.innerHTML = '<div class="empty-state">📭 No pages yet. Be the first to publish one!</div>';
+                    return;
+                }
+
+                const pages = Object.entries(data).reverse();
+                pages.forEach(([key, page]) => {
+                    const card = document.createElement('div');
+                    card.className = 'page-card';
+                    card.innerHTML = `
+                        <iframe src="${escapeHtml(page.url)}" sandbox="allow-scripts" loading="lazy"></iframe>
+                        <div class="page-card-info">
+                            <div class="user">
+                                <img src="${page.userPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(page.userName || 'U') + '&background=3a7bd5&color=fff&size=24'}" 
+                                     alt="avatar" 
+                                     onerror="this.src='https://ui-avatars.com/api/?name=U&background=3a7bd5&color=fff&size=24'">
+                                <span>${escapeHtml(page.userName || 'Anonymous')}</span>
+                            </div>
+                            <a href="${escapeHtml(page.url)}" target="_blank" rel="noopener">🔗 Open full page</a>
+                        </div>
+                    `;
+                    pagesGrid.appendChild(card);
+                });
+            }, (error) => {
+                console.error('Firebase read error:', error);
+                pagesGrid.innerHTML = '<div class="empty-state">⚠️ Failed to load pages. Check console.</div>';
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        // Start loading pages
+        loadAllPages();
+    </script>
+</body>
+</html>
