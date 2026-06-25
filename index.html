@@ -2,397 +2,169 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <title>CPT HOES - exposed</title>
-    
-    <meta name="description" content="Cape Town Reveals. Exposing cheaters and prostitutes.">
-    <meta property="og:title" content="CPT HOES - Reveal">
-    <meta property="og:description" content="Cape Town's official reveal page.">
-    <meta property="og:image" content="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjOf3gajaWhh6nP7hlRhsH055bW6HQSGY0-K8DXl3oa06b9NhepXLmEDU&s=10">
-    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worldwide HTML Pages - File Upload</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #eee;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 {
+            text-align: center; margin-bottom: 10px; font-size: 2em;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; font-size: 0.9em; }
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇿🇦</text></svg>">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        .auth-bar {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            margin-bottom: 20px; padding: 12px 16px; background: rgba(255,255,255,0.05);
+            border-radius: 12px; backdrop-filter: blur(10px); flex-wrap: wrap;
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-info img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #3a7bd5; }
+        .auth-forms { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .auth-forms input {
+            padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3); color: #eee; font-size: 14px; width: 180px;
+        }
+        .auth-forms input:focus { outline: none; border-color: #00d2ff; }
+        button {
+            padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: 600; transition: all 0.2s; font-size: 14px;
+        }
+        .google-btn { background: #4285f4; color: white; }
+        .email-btn { background: #3a7bd5; color: white; }
+        .logout-btn, .upgrade-btn { background: rgba(255,255,255,0.1); color: #eee; }
+        .premium-badge { background: gold; color: #000; padding: 2px 8px; border-radius: 20px; font-weight: bold; }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@800;900&display=swap" rel="stylesheet">
-</head>
-<script>(function(s){s.dataset.zone='10994494',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+        .upload-section {
+            background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;
+            margin-bottom: 24px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .upload-section h2 { margin-bottom: 12px; color: #00d2ff; }
+        textarea {
+            width: 100%; height: 150px; background: rgba(0,0,0,0.3); color: #eee;
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 12px;
+            font-family: 'Courier New', monospace; font-size: 14px; resize: vertical; margin-bottom: 10px;
+        }
+        textarea:focus { outline: none; border-color: #00d2ff; }
+        .upload-btn {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5); color: white;
+            padding: 12px 28px; border-radius: 10px; font-size: 16px; cursor: pointer;
+        }
+        .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .file-upload-row {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+        }
+        .file-label {
+            background: rgba(255,255,255,0.1); color: #ddd; padding: 10px 18px;
+            border-radius: 10px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center;
+            gap: 8px; transition: background 0.2s;
+        }
+        .file-label:hover { background: rgba(255,255,255,0.2); }
+        #uploadStatus { margin-top: 10px; font-size: 0.9em; }
+        .status-success { color: #4ade80; } .status-error { color: #f87171; } .status-loading { color: #fbbf24; }
+
+        .pages-section h2 { margin-bottom: 16px; color: #00d2ff; }
+        .pages-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
+        }
+        .page-card {
+            background: rgba(255,255,255,0.05); border-radius: 14px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s;
+        }
+        .page-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .page-card iframe {
+            width: 100%; height: 200px; border: none; background: white;
+        }
+        .ad-slot {
+            background: rgba(0,0,0,0.4); color: #aaa; display: flex;
+            align-items: center; justify-content: center; font-size: 14px;
+            min-height: 60px; width: 100%;
+        }
+        .ad-top { border-bottom: 1px dashed #555; }
+        .ad-bottom { border-top: 1px dashed #555; }
+        .countdown-container {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 10px; background: rgba(0,0,0,0.3); gap: 6px;
+        }
+        .timer-text { font-size: 1.2em; font-weight: bold; color: #00d2ff; }
+        .skip-btn {
+            background: transparent; border: 1px solid #fbbf24; color: #fbbf24;
+            padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 12px;
+        }
+        .skip-btn:hover { background: rgba(251,191,36,0.2); }
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px; color: #666; }
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 14px; height: 280px;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+    </style>
 </head>
 <body>
-<style>
-  :root {
-    --bg: #F2F5F9;
-    --ios-blue: #007AFF;
-    --orange: #FF9F43;
-    --orange-depth: #D37926;
-    --red: #FF3B30;
-    --green: #34C759;
-    --glass: rgba(255, 255, 255, 0.7);
-    --border: rgba(255, 255, 255, 0.8);
-    --shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-}
+<div class="container">
+    <h1>🌍 Worldwide HTML Pages</h1>
+    <p class="subtitle">Free: 10‑sec wait + ads | Premium: instant load</p>
 
-/* --- SYSTEM RESET --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    text-transform: uppercase;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
-body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background-color: var(--bg);
-    color: #1c1c1e;
-    line-height: 1.4;
-    overflow-x: hidden;
-    padding-bottom: 100px; /* Space for footer */
-}
-
-input, textarea {
-    user-select: text !important;
-    -webkit-user-select: text !important;
-}
-
-/* --- SCROLLBAR KILLER --- */
-::-webkit-scrollbar { display: none; }
-html { scrollbar-width: none; -ms-overflow-style: none; }
-
-/* --- IOS HEADER --- */
-.ios-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    padding: 15px 20px;
-    background: var(--glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-.header-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.brand { display: flex; align-items: center; gap: 10px; }
-.flag { font-size: 1.8rem; }
-.logo-text { font-weight: 900; font-size: 1.2rem; letter-spacing: -0.5px; }
-
-.ios-post-btn {
-    background: var(--orange);
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 16px;
-    font-weight: 800;
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 4px 0 var(--orange-depth), 0 8px 15px rgba(255, 159, 67, 0.3);
-    transition: all 0.1s ease;
-}
-
-.ios-post-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--orange-depth); }
-.plus-icon { width: 16px; height: 16px; fill: white; }
-
-/* --- SKELETONS & LAZY LOAD --- */
-.skeleton-card {
-    background: white;
-    margin: 20px 15px;
-    padding: 15px;
-    border-radius: 28px;
-    border: 2px solid white;
-}
-
-.skeleton-img { width: 100%; height: 250px; border-radius: 20px; background: #e1e4e8; margin-bottom: 15px; }
-.skeleton-text { height: 15px; background: #e1e4e8; border-radius: 10px; width: 80%; margin-bottom: 10px; }
-.skeleton-text.short { width: 40%; }
-
-.shimmer {
-    background: linear-gradient(90deg, #e1e4e8 25%, #f2f5f9 50%, #e1e4e8 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-
-/* --- POST CARDS --- */
-.post-card {
-    background: white;
-    margin: 20px 15px;
-    border-radius: 30px;
-    padding: 15px;
-    box-shadow: var(--shadow);
-    border: 3px solid white;
-    position: relative;
-    overflow: hidden;
-}
-
-.post-img-wrap { width: 100%; height: 300px; border-radius: 22px; overflow: hidden; margin-bottom: 15px; position: relative; }
-.post-img { width: 100%; height: 100%; object-fit: cover; }
-
-/* PENDING STATE (90% BLUR) */
-.post-card.pending .post-img { filter: blur(40px); transform: scale(1.1); }
-.post-card.pending::after {
-    content: 'PENDING APPROVAL';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: #FFD93D;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-weight: 900;
-    font-size: 0.8rem;
-    box-shadow: 0 4px 0 #D4B21D;
-    z-index: 2;
-}
-
-.post-info h2 { font-weight: 900; font-size: 1.3rem; margin-bottom: 5px; }
-.post-meta { font-size: 0.7rem; color: var(--orange); font-weight: 800; margin-bottom: 8px; display: block; }
-.post-desc { font-size: 0.9rem; color: #48484a; text-transform: none; line-height: 1.5; }
-
-/* --- MODALS --- */
-.ios-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-    display: none;
-    justify-content: center;
-    align-items: flex-end; /* Slide up from bottom */
-    z-index: 2000;
-}
-
-.modal-content {
-    background: white;
-    width: 100%;
-    max-width: 500px;
-    border-radius: 30px 30px 0 0;
-    padding: 20px 25px 40px;
-    animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-.modal-handle {
-    width: 40px; height: 5px; background: #D1D1D6; border-radius: 10px;
-    margin: 0 auto 20px;
-}
-
-.modal-title { font-weight: 900; font-size: 1.4rem; margin-bottom: 20px; text-align: center; }
-
-/* --- INPUTS --- */
-.input-group input, .input-group textarea, #reportModal input, #reportModal textarea, #messageModal textarea {
-    width: 100%;
-    background: #F2F2F7;
-    border: 2px solid transparent;
-    padding: 16px;
-    border-radius: 18px;
-    margin-bottom: 12px;
-    font-weight: 700;
-    font-family: inherit;
-}
-
-.input-group input:focus, .input-group textarea:focus {
-    background: white;
-    border-color: var(--orange);
-}
-
-.ios-submit-btn {
-    width: 100%; background: #000; color: white; border: none; padding: 18px;
-    border-radius: 20px; font-weight: 900; cursor: pointer; margin-top: 10px;
-    box-shadow: 0 6px 0 #333;
-}
-
-.ios-submit-btn.red { background: var(--red); box-shadow: 0 6px 0 #9E1F19; }
-
-.ios-cancel-btn {
-    width: 100%; background: transparent; border: none; padding: 15px;
-    font-weight: 800; font-size: 0.8rem; color: #8E8E93; cursor: pointer;
-}
-
-/* --- FOOTER --- */
-.ios-footer {
-    position: fixed;
-    bottom: 20px; left: 20px; right: 20px;
-    background: #000;
-    height: 75px;
-    border-radius: 28px;
-    z-index: 1000;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-}
-
-.footer-inner {
-    display: flex; justify-content: space-around; align-items: center; height: 100%;
-}
-
-.footer-tab {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    color: rgba(255,255,255,0.5); cursor: pointer;
-}
-
-.footer-tab svg { width: 24px; height: 24px; fill: currentColor; }
-.footer-tab span { font-size: 0.6rem; font-weight: 900; }
-.footer-tab:active { color: white; transform: scale(0.9); }
-
-/* --- TOASTS --- */
-#toast-wrapper { position: fixed; top: 20px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; z-index: 9999; pointer-events: none; }
-.toast {
-    background: var(--green); color: white; padding: 15px 25px; border-radius: 20px;
-    font-weight: 900; margin-bottom: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    animation: toastPop 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-}
-.toast.error { background: var(--red); }
-@keyframes toastPop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-</style>
-    <div id="toast-wrapper"></div>
-
-    <header class="ios-header">
-        <div class="header-inner">
-            <div class="brand">
-                <span class="flag">🇿🇦</span>
-                <h1 class="logo-text">CPT HOES</h1>
-            </div>
-            <button class="ios-post-btn" id="openPostModal">
-                <span>POST</span>
-                <svg class="plus-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            </button>
+    <!-- Auth Bar -->
+    <div class="auth-bar" id="authBar">
+        <div class="user-info" id="userInfo" style="display:none;">
+            <img id="userAvatar" src="" alt="avatar">
+            <span class="email-display" id="userEmailDisplay"></span>
+            <span id="premiumBadge" style="display:none;" class="premium-badge">⭐ PREMIUM</span>
+            <button class="upgrade-btn" id="upgradeBtn" style="display:none;" onclick="window.upgradeToPremium()">💎 Go Premium</button>
+            <button class="logout-btn" onclick="window.signOutUser()">🚪 Sign out</button>
         </div>
-    </header>
-
-    <main class="app-container">
-        
-        <div id="skeleton-container">
-            <div class="skeleton-card">
-                <div class="skeleton-img shimmer"></div>
-                <div class="skeleton-text shimmer"></div>
-                <div class="skeleton-text short shimmer"></div>
-            </div>
-            <div class="skeleton-card">
-                <div class="skeleton-img shimmer"></div>
-                <div class="skeleton-text shimmer"></div>
-                <div class="skeleton-text short shimmer"></div>
-            </div>
+        <div class="auth-forms" id="authForms">
+            <input type="email" id="emailInput" placeholder="Email" autocomplete="email">
+            <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+            <button class="email-btn" onclick="window.signUpWithEmail()">📧 Sign Up</button>
+            <button class="email-btn" onclick="window.signInWithEmail()">🔑 Log In</button>
+            <button class="google-btn" onclick="window.signInWithGoogle()">🔐 Google</button>
         </div>
+    </div>
 
-        <div id="feed-container"></div>
+    <!-- Upload Section -->
+    <div class="upload-section">
+        <h2>📝 Create a new page</h2>
+        <div class="file-upload-row">
+            <label for="htmlFileInput" class="file-label">
+                📁 Choose HTML file
+            </label>
+            <input type="file" id="htmlFileInput" accept=".html,.htm" style="display:none;">
+            <span id="fileNameDisplay" style="color:#aaa; font-size:0.9em;"></span>
+        </div>
+        <textarea id="htmlInput" placeholder="Paste your HTML code here... or use the button above to select a file."></textarea>
+        <button class="upload-btn" id="uploadBtn" onclick="window.uploadAndStore()">🚀 Upload & Publish</button>
+        <div id="uploadStatus"></div>
+    </div>
 
-        <div id="infinite-scroll-trigger"></div>
-    </main>
-<div class="ios-modal" id="postModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; align-items: flex-end; justify-content: center;">
-    <div class="modal-content" style="background: white; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 20px 20px 40px; position: relative; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);">
-        
-        <div class="modal-handle" style="width: 40px; height: 5px; background: #D1D1D6; border-radius: 10px; margin: 0 auto 20px;"></div>
-        
-        <h2 class="modal-title" style="font-weight: 900; font-size: 1.5rem; text-align: center; margin-bottom: 25px; letter-spacing: -0.5px;">NEW REVEAL</h2>
-        
-        <form id="revealForm" style="display: flex; flex-direction: column; gap: 15px;">
-            
-            <div class="upload-area" id="imagePicker" style="width: 100%; aspect-ratio: 1/1; max-height: 300px; background: #F2F2F7; border-radius: 24px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; border: 3px dashed #D1D1D6; position: relative;">
-                <input type="file" id="fileInput" accept="image/*" hidden>
-                
-                <div id="uploadPlaceholder" style="display: flex; flex-direction: column; align-items: center; gap: 10px; color: #8E8E93;">
-                    <svg style="width: 40px; height: 40px; fill: currentColor;" viewBox="0 0 24 24">
-                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                    </svg>
-                    <span style="font-weight: 800; font-size: 0.8rem;">TAP TO ADD PHOTO</span>
-                </div>
-
-                <img id="imagePreview" src="" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
-            </div>
-
-            <div class="input-group" style="display: flex; flex-direction: column; gap: 12px;">
-                <input type="text" id="targetName" placeholder="PERSON'S FULL NAME" required 
-                    style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: #F2F2F7; font-weight: 700; font-family: inherit; font-size: 0.9rem; outline: none;">
-                
-                <input type="text" id="targetCity" placeholder="CITY (E.G. CAPE TOWN)" required 
-                    style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: #F2F2F7; font-weight: 700; font-family: inherit; font-size: 0.9rem; outline: none;">
-                
-                <textarea id="targetDesc" placeholder="WHAT DID THEY DO? (MIN. 20 CHARS)" minlength="20" required 
-                    style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: #F2F2F7; font-weight: 700; font-family: inherit; font-size: 0.9rem; outline: none; min-height: 100px; resize: none; text-transform: none;"></textarea>
-            </div>
-
-            <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
-                <button type="submit" id="submitReveal" 
-                    style="width: 100%; background: #000; color: #FFF; padding: 18px; border-radius: 18px; font-weight: 900; border: none; font-size: 0.9rem; box-shadow: 0 6px 0 #333; cursor: pointer;">
-                    SUBMIT FOR REVEAL
-                </button>
-                
-                <button type="button" onclick="closeAllModals()" 
-                    style="width: 100%; background: transparent; color: #8E8E93; padding: 12px; border-radius: 18px; font-weight: 800; border: none; font-size: 0.8rem; cursor: pointer;">
-                    CANCEL
-                </button>
-            </div>
-        </form>
+    <!-- Pages list -->
+    <div class="pages-section">
+        <h2>📄 All published pages (real‑time)</h2>
+        <div class="pages-grid" id="pagesGrid">
+            <div class="shimmer"></div><div class="shimmer"></div><div class="shimmer"></div>
+        </div>
     </div>
 </div>
 
-    <div class="ios-modal" id="reportModal">
-        <div class="modal-content">
-            <div class="modal-handle"></div>
-            <h2 class="modal-title">REPORT</h2>
-            <input type="text" id="reportPostId" placeholder="Paste Post ID here">
-            <textarea id="reportReason" placeholder="Reason for report..."></textarea>
-            <button class="ios-submit-btn red" id="confirmReport">SEND REPORT</button>
-            <button type="button" class="ios-cancel-btn" onclick="closeAllModals()">Close</button>
-        </div>
-    </div>
-
-    <div class="ios-modal" id="manageModal">
-        <div class="modal-content">
-            <div class="modal-handle"></div>
-            <h2 class="modal-title">YOUR POSTS</h2>
-            <div id="user-posts-list">
-                </div>
-            <button type="button" class="ios-cancel-btn" onclick="closeAllModals()">Close</button>
-        </div>
-    </div>
-
-    <div class="ios-modal" id="messageModal">
-        <div class="modal-content">
-            <div class="modal-handle"></div>
-            <h2 class="modal-title">MESSAGE US</h2>
-            <textarea id="adminMessage" placeholder="Type your message to the admin team..."></textarea>
-            <button class="ios-submit-btn" id="confirmMessage">SEND MESSAGE</button>
-            <button type="button" class="ios-cancel-btn" onclick="closeAllModals()">Close</button>
-        </div>
-    </div>
-
-    <footer class="ios-footer">
-        <div class="footer-inner">
-            <div class="footer-tab" id="tabReport">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                <span>Report</span>
-            </div>
-            <div class="footer-tab" id="tabManage">
-                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                <span>My Posts</span>
-            </div>
-            <div class="footer-tab" id="tabMessage">
-                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                <span>Message</span>
-            </div>
-        </div>
-    </footer>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, push, set, onValue, query, orderByChild, get, remove, increment, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, serverTimestamp, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    import {
+        getAuth,
+        signInWithPopup, GoogleAuthProvider,
+        signInWithEmailAndPassword, createUserWithEmailAndPassword,
+        signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
@@ -400,236 +172,282 @@ html { scrollbar-width: none; -ms-overflow-style: none; }
         databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
         projectId: "itzhoyoo-f9f7e",
         storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-        appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5"
+        messagingSenderId: "1094792075584",
+        appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
+        measurementId: "G-LLT6F9WRKH"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const IMGUR_CLIENT_ID = "891e5bb4aa94282";
+    const auth = getAuth(app);
 
-    let deviceId = localStorage.getItem('cpt_device_id') || ('DEV-' + Math.random().toString(36).substr(2, 9));
-    localStorage.setItem('cpt_device_id', deviceId);
+    let currentUser = null;
+    let isPremium = false;
 
-    const feedContainer = document.getElementById('feed-container');
-    const skeletonContainer = document.getElementById('skeleton-container');
-    const toastWrapper = document.getElementById('toast-wrapper');
-
-    window.notify = (msg, type = 'success') => {
-        const t = document.createElement('div');
-        t.className = `toast ${type}`;
-        t.innerText = msg;
-        toastWrapper.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
-    };
-
-    window.closeAllModals = () => {
-        document.querySelectorAll('.ios-modal').forEach(m => m.style.display = 'none');
-    };
-
-    const openModal = (id) => {
-        const modal = document.getElementById(id);
-        if(modal) modal.style.display = 'flex';
-    };
-
-    // Tab Listeners
-    document.getElementById('openPostModal').onclick = () => openModal('postModal');
-    document.getElementById('tabReport').onclick = () => openModal('reportModal');
-    document.getElementById('tabMessage').onclick = () => openModal('messageModal');
-    document.getElementById('tabManage').onclick = () => {
-        renderUserPosts();
-        openModal('manageModal');
-    };
-
-    const fileInput = document.getElementById('fileInput');
-    const imgPreview = document.getElementById('imagePreview');
-    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-
-    document.getElementById('imagePicker').onclick = () => fileInput.click();
-    fileInput.onchange = (e) => {
-        const [file] = e.target.files;
-        if (file) {
-            imgPreview.src = URL.createObjectURL(file);
-            imgPreview.style.display = 'block';
-            uploadPlaceholder.style.display = 'none';
+    // Premium check
+    async function checkPremium(user) {
+        if (!user) { isPremium = false; return; }
+        const userRef = ref(db, `users/${user.uid}/premium`);
+        const snapshot = await get(userRef);
+        isPremium = snapshot.exists() ? snapshot.val() === true : false;
+        updatePremiumUI();
+    }
+    function updatePremiumUI() {
+        const badge = document.getElementById('premiumBadge');
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        if (currentUser) {
+            if (isPremium) {
+                badge.style.display = 'inline-block';
+                upgradeBtn.style.display = 'none';
+            } else {
+                badge.style.display = 'none';
+                upgradeBtn.style.display = 'inline-block';
+            }
+        } else {
+            badge.style.display = 'none';
+            upgradeBtn.style.display = 'none';
         }
+    }
+    window.upgradeToPremium = async () => {
+        if (!currentUser) return alert('Sign in first.');
+        await set(ref(db, `users/${currentUser.uid}/premium`), true);
+        isPremium = true;
+        updatePremiumUI();
+        alert('🎉 You are now Premium! Refresh to see pages instantly.');
+        loadAllPages();
     };
 
-    document.getElementById('revealForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('submitReveal');
-        const file = fileInput.files[0];
-        const name = document.getElementById('targetName').value.trim();
-        const city = document.getElementById('targetCity').value.trim();
-        const desc = document.getElementById('targetDesc').value.trim();
+    function updateUI(user) {
+        currentUser = user;
+        const userInfo = document.getElementById('userInfo');
+        const authForms = document.getElementById('authForms');
+        if (user) {
+            userInfo.style.display = 'flex';
+            authForms.style.display = 'none';
+            document.getElementById('userEmailDisplay').textContent = user.email || user.displayName || 'User';
+            document.getElementById('userAvatar').src = user.photoURL ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'U')}&background=3a7bd5&color=fff&size=36`;
+            checkPremium(user);
+        } else {
+            userInfo.style.display = 'none';
+            authForms.style.display = 'flex';
+            isPremium = false;
+        }
+        document.getElementById('emailInput').value = '';
+        document.getElementById('passwordInput').value = '';
+    }
 
-        if (!file) return notify("Please add a photo", "error");
-        if (desc.length < 20) return notify("Description too short!", "error");
-        
-        btn.disabled = true;
-        btn.innerText = "UPLOADING...";
+    onAuthStateChanged(auth, updateUI);
 
+    // Auth functions
+    window.signInWithGoogle = async () => {
+        const provider = new GoogleAuthProvider();
+        try { await signInWithPopup(auth, provider); } catch (err) { alert('Google sign in failed: ' + err.message); }
+    };
+    window.signUpWithEmail = async () => {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        if (!email || !password) return alert('Enter email and password.');
+        try { await createUserWithEmailAndPassword(auth, email, password); } catch (err) { alert('Sign up failed: ' + err.message); }
+    };
+    window.signInWithEmail = async () => {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        if (!email || !password) return alert('Enter email and password.');
+        try { await signInWithEmailAndPassword(auth, email, password); } catch (err) { alert('Login failed: ' + err.message); }
+    };
+    window.signOutUser = async () => {
+        try { await signOut(auth); } catch (err) { console.error('Sign out error:', err); }
+    };
+
+    // File upload: read HTML file and populate textarea
+    document.getElementById('htmlFileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        const display = document.getElementById('fileNameDisplay');
+        if (!file) {
+            display.textContent = '';
+            return;
+        }
+        display.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            document.getElementById('htmlInput').value = ev.target.result;
+            display.textContent = file.name + ' (loaded)';
+        };
+        reader.onerror = () => {
+            alert('Failed to read file.');
+            display.textContent = '';
+        };
+        reader.readAsText(file);
+    });
+
+    // Upload function (unchanged logic)
+    window.uploadAndStore = async () => {
+        const htmlInput = document.getElementById('htmlInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const html = htmlInput.value.trim();
+        if (!html) { uploadStatus.innerHTML = '<span class="status-error">❌ Please enter HTML code or select a file.</span>'; return; }
+        if (!currentUser) { uploadStatus.innerHTML = '<span class="status-error">❌ Please sign in first.</span>'; return; }
+        uploadBtn.disabled = true;
+        uploadStatus.innerHTML = '<span class="status-loading">⏳ Uploading to Supabase...</span>';
         try {
-            const formData = new FormData();
-            formData.append('image', file);
-            const imgRes = await fetch('https://api.imgur.com/3/image', {
+            const response = await fetch('/api/storage', {
                 method: 'POST',
-                headers: { Authorization: `Client-ID ${IMGUR_CLIENT_ID}` },
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ html })
             });
-            const imgData = await imgRes.json();
-            if(!imgData.success) throw new Error("Imgur Failed");
-
-            const postRef = push(ref(db, 'posts'));
-            await set(postRef, {
-                id: postRef.key,
-                name: name,
-                location: city,
-                description: desc,
-                imageUrl: imgData.data.link,
-                creatorId: deviceId,
-                approved: false,
-                likes: 0,
-                dislikes: 0,
-                timestamp: Date.now()
+            const data = await response.json();
+            if (!response.ok || data.error) throw new Error(data.error || 'Upload failed');
+            const publicUrl = data.url;
+            uploadStatus.innerHTML = '<span class="status-loading">✅ Uploaded! Saving to Firebase...</span>';
+            await push(ref(db, 'pages'), {
+                url: publicUrl,
+                userId: currentUser.uid,
+                userName: currentUser.displayName || currentUser.email || 'Anonymous',
+                userPhoto: currentUser.photoURL || null,
+                createdAt: serverTimestamp()
             });
-
-            notify("SUBMITTED FOR REVIEW!");
-            closeAllModals();
-            e.target.reset();
-            imgPreview.style.display = 'none';
-            uploadPlaceholder.style.display = 'flex';
+            uploadStatus.innerHTML = '<span class="status-success">🎉 Published! Visible worldwide.</span>';
+            htmlInput.value = '';
+            document.getElementById('fileNameDisplay').textContent = '';
         } catch (err) {
-            notify("Error: " + err.message, "error");
+            console.error('Upload error:', err);
+            uploadStatus.innerHTML = `<span class="status-error">❌ Error: ${err.message}</span>`;
         } finally {
-            btn.disabled = false;
-            btn.innerText = "SUBMIT FOR REVIEW";
+            uploadBtn.disabled = false;
         }
     };
 
-    const renderFeed = () => {
-        const postsRef = ref(db, 'posts');
-        onValue(postsRef, (snapshot) => {
-            if (skeletonContainer) skeletonContainer.style.display = 'none';
-            feedContainer.innerHTML = "";
-            
+    // Page card with ads/countdown (exactly as before, unchanged)
+    function createPageCard(pageData, isUserPremium) {
+        const card = document.createElement('div');
+        card.className = 'page-card';
+
+        const adTop = document.createElement('div');
+        adTop.className = 'ad-slot ad-top';
+        adTop.textContent = 'Ad Slot 1';
+
+        const adBottom = document.createElement('div');
+        adBottom.className = 'ad-slot ad-bottom';
+        adBottom.textContent = 'Ad Slot 2';
+
+        const timerContainer = document.createElement('div');
+        timerContainer.className = 'countdown-container';
+        const timerText = document.createElement('div');
+        timerText.className = 'timer-text';
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'skip-btn';
+        skipBtn.textContent = 'Skip & Upgrade';
+        skipBtn.onclick = () => window.upgradeToPremium();
+        timerContainer.appendChild(timerText);
+        timerContainer.appendChild(skipBtn);
+
+        const iframe = document.createElement('iframe');
+        iframe.src = '';
+        iframe.sandbox = 'allow-scripts';
+        iframe.loading = 'lazy';
+        iframe.style.display = 'none';
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'page-card-info';
+        infoDiv.innerHTML = `
+            <div class="user">
+                <img src="${pageData.userPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(pageData.userName || 'U') + '&background=3a7bd5&color=fff&size=24'}" 
+                     alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=3a7bd5&color=fff&size=24'">
+                <span>${escapeHtml(pageData.userName || 'Anonymous')}</span>
+            </div>
+            <a href="${escapeHtml(pageData.url)}" target="_blank" rel="noopener">🔗 Open full page</a>
+        `;
+
+        card.appendChild(adTop);
+        card.appendChild(timerContainer);
+        card.appendChild(adBottom);
+        card.appendChild(iframe);
+        card.appendChild(infoDiv);
+
+        if (isUserPremium) {
+            adTop.style.display = 'none';
+            adBottom.style.display = 'none';
+            timerContainer.style.display = 'none';
+            iframe.src = pageData.url;
+            iframe.style.display = 'block';
+            return card;
+        }
+
+        let countdown = 10;
+        let timerInterval = null;
+        let isVisible = false;
+        let finished = false;
+        timerText.textContent = `Loading in ${countdown}s...`;
+        iframe.src = pageData.url;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                isVisible = entry.isIntersecting;
+                if (isVisible && !finished && countdown > 0) startTimer();
+                else stopTimer();
+            });
+        }, { threshold: 0.1 });
+        observer.observe(card);
+
+        function startTimer() {
+            if (timerInterval) return;
+            timerInterval = setInterval(() => {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    finished = true;
+                    adTop.style.display = 'none';
+                    adBottom.style.display = 'none';
+                    timerContainer.style.display = 'none';
+                    iframe.style.display = 'block';
+                } else {
+                    timerText.textContent = `Loading in ${countdown}s...`;
+                }
+            }, 1000);
+        }
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        card._observer = observer;
+        card._stopTimer = stopTimer;
+        return card;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function loadAllPages() {
+        const pagesGrid = document.getElementById('pagesGrid');
+        pagesGrid.querySelectorAll('.page-card').forEach(card => {
+            if (card._observer) card._observer.disconnect();
+            if (card._stopTimer) card._stopTimer();
+        });
+        onValue(ref(db, 'pages'), (snapshot) => {
             const data = snapshot.val();
+            pagesGrid.innerHTML = '';
             if (!data) {
-                feedContainer.innerHTML = "<p style='text-align:center; padding:50px; color:#8e8e93;'>NO REVEALS YET</p>";
+                pagesGrid.innerHTML = '<div class="empty-state">📭 No pages yet. Be the first to publish one!</div>';
                 return;
             }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const sharedId = urlParams.get('id');
-
-            // Convert to array and filter out nulls/undefineds
-            const posts = Object.values(data).filter(p => p && p.id).sort((a, b) => b.timestamp - a.timestamp);
-
-            posts.forEach(post => {
-                // Filter: Only show approved OR the user's own pending post
-                const isOwner = post.creatorId === deviceId;
-                if (!post.approved && !isOwner) return;
-
-                const card = document.createElement('div');
-                card.className = `post-card ${!post.approved ? 'pending' : ''}`;
-                if (sharedId === post.id) card.style.border = "3px solid var(--orange)";
-
-                card.innerHTML = `
-                    <div class="post-img-wrap">
-                        <img src="${post.imageUrl}" class="post-img" onerror="this.src='https://via.placeholder.com/400x400?text=Image+Error'">
-                    </div>
-                    <div class="post-info">
-                        <span class="post-meta">📍 ${post.location || 'Unknown'} • ID: ${post.id}</span>
-                        <h2 style="text-transform:uppercase;">${post.name || 'Anonymous'}</h2>
-                        <p class="post-desc">${post.description}</p>
-                        
-                        <div style="display:flex; gap:12px; margin-top:20px;">
-                            <button onclick="handleVote('${post.id}', 'likes')" class="ios-post-btn" style="background:#f2f2f7; color:#000; box-shadow:none; padding:8px 12px; border:none;">
-                                👍 ${post.likes || 0}
-                            </button>
-                            <button onclick="handleVote('${post.id}', 'dislikes')" class="ios-post-btn" style="background:#f2f2f7; color:#000; box-shadow:none; padding:8px 12px; border:none;">
-                                👎 ${post.dislikes || 0}
-                            </button>
-                            <button onclick="sharePost('${post.id}')" class="ios-post-btn" style="margin-left:auto; border:none;">SHARE</button>
-                        </div>
-                    </div>
-                `;
-                feedContainer.appendChild(card);
+            const pages = Object.entries(data).reverse();
+            pages.forEach(([key, page]) => {
+                pagesGrid.appendChild(createPageCard(page, isPremium));
             });
+        }, (err) => {
+            console.error('Firebase read error:', err);
+            pagesGrid.innerHTML = '<div class="empty-state">⚠️ Failed to load pages.</div>';
         });
-    };
+    }
 
-    window.handleVote = (id, type) => {
-        const key = `voted_${id}`;
-        if (localStorage.getItem(key)) return notify("Already voted!", "error");
-        update(ref(db, `posts/${id}`), { [type]: increment(1) });
-        localStorage.setItem(key, true);
-        notify("Voted!");
-    };
-
-    window.sharePost = (id) => {
-        const url = `${window.location.origin}${window.location.pathname}?id=${id}`;
-        if (navigator.share) {
-            navigator.share({ title: 'CPT REVEAL', url: url });
-        } else {
-            navigator.clipboard.writeText(url);
-            notify("Link Copied!");
-        }
-    };
-
-    const renderUserPosts = async () => {
-        const list = document.getElementById('user-posts-list');
-        list.innerHTML = "Fetching...";
-        const snap = await get(ref(db, 'posts'));
-        list.innerHTML = "";
-        
-        let found = 0;
-        if (snap.exists()) {
-            Object.values(snap.val()).forEach(p => {
-                if (p && p.creatorId === deviceId) {
-                    found++;
-                    const item = document.createElement('div');
-                    item.style = "background:#F2F2F7; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;";
-                    item.innerHTML = `
-                        <div>
-                            <p style="font-weight:900; font-size:0.8rem;">${p.name || 'Unnamed'}</p>
-                            <p style="font-size:0.6rem; color:${p.approved ? '#34C759' : '#FF9F43'}; font-weight:900;">${p.approved ? 'LIVE' : 'PENDING'}</p>
-                        </div>
-                        <button onclick="deletePost('${p.id}')" style="background:var(--red); color:white; border:none; padding:8px 12px; border-radius:10px; font-weight:900; font-size:0.6rem;">DELETE</button>
-                    `;
-                    list.appendChild(item);
-                }
-            });
-        }
-        if (found === 0) list.innerHTML = "<p style='text-align:center; color:#8e8e93; font-size:0.8rem;'>No reveals found.</p>";
-    };
-
-    window.deletePost = async (id) => {
-        if (confirm("Delete this reveal permanently?")) {
-            await remove(ref(db, `posts/${id}`));
-            notify("Deleted successfully.");
-            renderUserPosts();
-        }
-    };
-
-    document.getElementById('confirmReport').onclick = async () => {
-        const postId = document.getElementById('reportPostId').value.trim();
-        const reason = document.getElementById('reportReason').value.trim();
-        if (!postId || !reason) return notify("Fill all fields", "error");
-        await push(ref(db, 'reports'), { postId, reason, deviceId, timestamp: Date.now() });
-        notify("Report submitted.");
-        closeAllModals();
-    };
-
-    document.getElementById('confirmMessage').onclick = async () => {
-        const msg = document.getElementById('adminMessage').value.trim();
-        if (!msg) return notify("Message empty", "error");
-        await push(ref(db, 'messages'), { message: msg, deviceId, timestamp: Date.now() });
-        notify("Message sent.");
-        closeAllModals();
-    };
-
-    renderFeed();
+    loadAllPages();
 </script>
-
 </body>
 </html>
