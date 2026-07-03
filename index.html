@@ -1,453 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Worldwide HTML Pages - File Upload</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            color: #eee;
-            padding: 20px;
-        }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 {
-            text-align: center; margin-bottom: 10px; font-size: 2em;
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .subtitle { text-align: center; color: #aaa; margin-bottom: 20px; font-size: 0.9em; }
+<meta charset="UTF-8">
+<title>DAY 100 — Floating Island Survival</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @font-face {
+    font-family: 'PixelFont';
+    src: local('Courier New');
+  }
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#000; font-family: 'Consolas','Courier New',monospace; }
+  #canvas-wrap { position:fixed; inset:0; }
+  canvas { display:block; }
 
-        .auth-bar {
-            display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            margin-bottom: 20px; padding: 12px 16px; background: rgba(255,255,255,0.05);
-            border-radius: 12px; backdrop-filter: blur(10px); flex-wrap: wrap;
-        }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-info img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #3a7bd5; }
-        .auth-forms { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .auth-forms input {
-            padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3); color: #eee; font-size: 14px; width: 180px;
-        }
-        .auth-forms input:focus { outline: none; border-color: #00d2ff; }
-        button {
-            padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer;
-            font-weight: 600; transition: all 0.2s; font-size: 14px;
-        }
-        .google-btn { background: #4285f4; color: white; }
-        .email-btn { background: #3a7bd5; color: white; }
-        .logout-btn, .upgrade-btn { background: rgba(255,255,255,0.1); color: #eee; }
-        .premium-badge { background: gold; color: #000; padding: 2px 8px; border-radius: 20px; font-weight: bold; }
+  /* ---------- Crosshair ---------- */
+  #crosshair {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:18px; height:18px; pointer-events:none; z-index:50;
+  }
+  #crosshair::before, #crosshair::after {
+    content:''; position:absolute; background:rgba(255,255,255,0.85);
+    box-shadow:0 0 2px rgba(0,0,0,0.8);
+  }
+  #crosshair::before { left:8px; top:0; width:2px; height:18px; }
+  #crosshair::after { top:8px; left:0; height:2px; width:18px; }
 
-        .upload-section {
-            background: rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;
-            margin-bottom: 24px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
-        }
-        .upload-section h2 { margin-bottom: 12px; color: #00d2ff; }
-        textarea {
-            width: 100%; height: 150px; background: rgba(0,0,0,0.3); color: #eee;
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 12px;
-            font-family: 'Courier New', monospace; font-size: 14px; resize: vertical; margin-bottom: 10px;
-        }
-        textarea:focus { outline: none; border-color: #00d2ff; }
-        .upload-btn {
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5); color: white;
-            padding: 12px 28px; border-radius: 10px; font-size: 16px; cursor: pointer;
-        }
-        .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .file-upload-row {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
-        }
-        .file-label {
-            background: rgba(255,255,255,0.1); color: #ddd; padding: 10px 18px;
-            border-radius: 10px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center;
-            gap: 8px; transition: background 0.2s;
-        }
-        .file-label:hover { background: rgba(255,255,255,0.2); }
-        #uploadStatus { margin-top: 10px; font-size: 0.9em; }
-        .status-success { color: #4ade80; } .status-error { color: #f87171; } .status-loading { color: #fbbf24; }
+  /* ---------- HUD top ---------- */
+  #hud-top {
+    position:fixed; top:14px; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    pointer-events:none; z-index:40;
+  }
+  #day-badge {
+    background:rgba(10,8,6,0.72); border:1px solid rgba(255,180,80,0.35);
+    color:#ffd9a0; padding:6px 22px; border-radius:3px;
+    letter-spacing:3px; font-size:13px; font-weight:bold;
+    text-shadow:0 0 8px rgba(255,150,50,0.6);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+  }
+  #day-badge.day100 { color:#ffde5c; border-color:#ffde5c; text-shadow:0 0 14px #ffb600; animation:pulseGold 1.4s infinite; }
+  @keyframes pulseGold { 0%,100%{opacity:1;} 50%{opacity:0.55;} }
+  #clock-bar-wrap {
+    width:220px; height:6px; background:rgba(0,0,0,0.5); border-radius:3px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.15);
+  }
+  #clock-bar { height:100%; width:0%; background:linear-gradient(90deg,#ffd27a,#ff9d3d); transition:width .3s linear; }
 
-        .pages-section h2 { margin-bottom: 16px; color: #00d2ff; }
-        .pages-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
-        }
-        .page-card {
-            background: rgba(255,255,255,0.05); border-radius: 14px; overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s;
-        }
-        .page-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
-        .page-card iframe {
-            width: 100%; height: 200px; border: none; background: white;
-        }
-        .ad-slot {
-            background: rgba(0,0,0,0.4); color: #aaa; display: flex;
-            align-items: center; justify-content: center; font-size: 14px;
-            min-height: 60px; width: 100%;
-        }
-        .ad-top { border-bottom: 1px dashed #555; }
-        .ad-bottom { border-top: 1px dashed #555; }
-        .countdown-container {
-            display: flex; flex-direction: column; align-items: center;
-            padding: 10px; background: rgba(0,0,0,0.3); gap: 6px;
-        }
-        .timer-text { font-size: 1.2em; font-weight: bold; color: #00d2ff; }
-        .skip-btn {
-            background: transparent; border: 1px solid #fbbf24; color: #fbbf24;
-            padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 12px;
-        }
-        .skip-btn:hover { background: rgba(251,191,36,0.2); }
-        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px; color: #666; }
-        .shimmer {
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
-            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 14px; height: 280px;
-        }
-        @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-    </style>
+  /* ---------- HUD bottom stats ---------- */
+  #hud-bottom-left {
+    position:fixed; left:16px; bottom:16px; z-index:40; pointer-events:none;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .stat-row { display:flex; align-items:center; gap:8px; }
+  .stat-icon { width:20px; text-align:center; font-size:15px; filter:drop-shadow(0 1px 2px #000); }
+  .stat-bar-wrap {
+    width:150px; height:12px; background:rgba(0,0,0,0.55);
+    border:1px solid rgba(255,255,255,0.2); border-radius:2px; overflow:hidden;
+  }
+  .stat-bar { height:100%; width:100%; transition:width .25s ease; }
+  #health-bar { background:linear-gradient(90deg,#ff4b4b,#c81f1f); }
+  #hunger-bar { background:linear-gradient(90deg,#ffb347,#d97e1a); }
+  #stamina-bar { background:linear-gradient(90deg,#7dff8a,#33b53f); }
+
+  /* ---------- Hotbar ---------- */
+  #hotbar {
+    position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+    display:flex; gap:4px; z-index:40;
+  }
+  .slot {
+    width:52px; height:52px; background:rgba(15,12,10,0.75);
+    border:2px solid rgba(255,255,255,0.25); border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative; font-size:24px; cursor:pointer;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+  }
+  .slot.active { border-color:#ffde5c; box-shadow:0 0 10px rgba(255,222,92,0.7), inset 0 0 8px rgba(0,0,0,0.5); }
+  .slot .count {
+    position:absolute; bottom:2px; right:4px; font-size:11px; color:#fff;
+    text-shadow:1px 1px 1px #000; font-weight:bold;
+  }
+  .slot .key {
+    position:absolute; top:1px; left:3px; font-size:9px; color:rgba(255,255,255,0.5);
+  }
+
+  /* ---------- Vignette / night overlay ---------- */
+  #night-overlay {
+    position:fixed; inset:0; pointer-events:none; z-index:20;
+    background: radial-gradient(circle at center, rgba(0,0,10,0) 40%, rgba(0,0,15,0.55) 100%);
+    opacity:0; transition:opacity 2s ease;
+  }
+  #vignette {
+    position:fixed; inset:0; pointer-events:none; z-index:19;
+    box-shadow: inset 0 0 160px rgba(0,0,0,0.55);
+  }
+
+  /* ---------- Damage flash ---------- */
+  #damage-flash {
+    position:fixed; inset:0; pointer-events:none; z-index:60;
+    background:rgba(200,0,0,0.35); opacity:0; transition:opacity .15s ease;
+  }
+
+  /* ---------- Messages ---------- */
+  #msg-log {
+    position:fixed; top:70px; left:16px; z-index:40; pointer-events:none;
+    display:flex; flex-direction:column; gap:4px; max-width:280px;
+  }
+  .msg {
+    background:rgba(10,8,6,0.7); border-left:3px solid #ffb347;
+    padding:5px 10px; font-size:12px; color:#f0e6d8;
+    animation: fadeInOut 4s forwards;
+  }
+  @keyframes fadeInOut {
+    0% { opacity:0; transform:translateX(-8px); }
+    10% { opacity:1; transform:translateX(0); }
+    80% { opacity:1; }
+    100% { opacity:0; }
+  }
+
+  /* ---------- Build menu ---------- */
+  #build-hint {
+    position:fixed; bottom:78px; left:50%; transform:translateX(-50%);
+    font-size:11px; color:rgba(255,255,255,0.6); z-index:40; pointer-events:none;
+    letter-spacing:1px;
+  }
+
+  /* ---------- Start screen ---------- */
+  #start-screen {
+    position:fixed; inset:0; z-index:100;
+    background: radial-gradient(ellipse at 50% 30%, #1a2438 0%, #05070c 75%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#e8ecf5; text-align:center; padding:20px;
+  }
+  #start-screen h1 {
+    font-size:44px; letter-spacing:6px; font-weight:900;
+    background:linear-gradient(180deg,#fff6da,#ffb84d);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 40px rgba(255,180,60,0.25);
+    margin-bottom:6px;
+  }
+  #start-screen .sub { color:#9fb0d0; font-size:13px; letter-spacing:3px; margin-bottom:34px; }
+  #start-screen .desc { max-width:480px; font-size:13px; line-height:1.7; color:#c3cbe0; margin-bottom:30px; }
+  #start-btn {
+    background:linear-gradient(180deg,#ffcf7a,#ff9d3d); border:none; color:#2b1600;
+    font-weight:bold; letter-spacing:2px; padding:14px 42px; font-size:15px;
+    border-radius:3px; cursor:pointer; box-shadow:0 6px 18px rgba(255,150,40,0.35);
+    transition:transform .15s ease;
+  }
+  #start-btn:hover { transform:translateY(-2px); }
+  #controls-grid {
+    margin-top:34px; display:grid; grid-template-columns:repeat(2,1fr); gap:6px 30px;
+    font-size:11.5px; color:#8fa0c4; text-align:left;
+  }
+  #controls-grid b { color:#e8ecf5; display:inline-block; width:80px; }
+  #loading-note { margin-top:22px; font-size:11px; color:#5c6a8a; }
+
+  /* ---------- Death / Victory screen ---------- */
+  #end-screen {
+    position:fixed; inset:0; z-index:110; display:none;
+    align-items:center; justify-content:center; flex-direction:column;
+    background:rgba(2,2,4,0.92); color:#fff; text-align:center;
+  }
+  #end-screen h1 { font-size:40px; letter-spacing:5px; margin-bottom:14px; }
+  #end-screen.dead h1 { color:#ff5b5b; text-shadow:0 0 30px rgba(255,0,0,0.5); }
+  #end-screen.win h1 { color:#ffde5c; text-shadow:0 0 30px rgba(255,200,0,0.5); }
+  #end-screen p { color:#b8c0d8; font-size:13px; margin-bottom:26px; letter-spacing:1px; }
+  #restart-btn {
+    background:#fff; color:#111; border:none; padding:12px 36px; font-weight:bold;
+    letter-spacing:2px; border-radius:3px; cursor:pointer; font-size:13px;
+  }
+
+  /* ---------- Pause hint ---------- */
+  #pointer-hint {
+    position:fixed; inset:0; z-index:35; display:none;
+    align-items:center; justify-content:center; pointer-events:none;
+  }
+  #pointer-hint span {
+    background:rgba(0,0,0,0.6); padding:14px 26px; border-radius:4px;
+    color:#fff; font-size:14px; letter-spacing:2px;
+  }
+</style>
 </head>
 <body>
-<div class="container">
-    <h1>🌍 Worldwide HTML Pages</h1>
-    <p class="subtitle">Free: 10‑sec wait + ads | Premium: instant load</p>
 
-    <!-- Auth Bar -->
-    <div class="auth-bar" id="authBar">
-        <div class="user-info" id="userInfo" style="display:none;">
-            <img id="userAvatar" src="" alt="avatar">
-            <span class="email-display" id="userEmailDisplay"></span>
-            <span id="premiumBadge" style="display:none;" class="premium-badge">⭐ PREMIUM</span>
-            <button class="upgrade-btn" id="upgradeBtn" style="display:none;" onclick="window.upgradeToPremium()">💎 Go Premium</button>
-            <button class="logout-btn" onclick="window.signOutUser()">🚪 Sign out</button>
-        </div>
-        <div class="auth-forms" id="authForms">
-            <input type="email" id="emailInput" placeholder="Email" autocomplete="email">
-            <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
-            <button class="email-btn" onclick="window.signUpWithEmail()">📧 Sign Up</button>
-            <button class="email-btn" onclick="window.signInWithEmail()">🔑 Log In</button>
-            <button class="google-btn" onclick="window.signInWithGoogle()">🔐 Google</button>
-        </div>
-    </div>
+<div id="canvas-wrap"></div>
+<div id="crosshair"></div>
+<div id="night-overlay"></div>
+<div id="vignette"></div>
+<div id="damage-flash"></div>
 
-    <!-- Upload Section -->
-    <div class="upload-section">
-        <h2>📝 Create a new page</h2>
-        <div class="file-upload-row">
-            <label for="htmlFileInput" class="file-label">
-                📁 Choose HTML file
-            </label>
-            <input type="file" id="htmlFileInput" accept=".html,.htm" style="display:none;">
-            <span id="fileNameDisplay" style="color:#aaa; font-size:0.9em;"></span>
-        </div>
-        <textarea id="htmlInput" placeholder="Paste your HTML code here... or use the button above to select a file."></textarea>
-        <button class="upload-btn" id="uploadBtn" onclick="window.uploadAndStore()">🚀 Upload & Publish</button>
-        <div id="uploadStatus"></div>
-    </div>
-
-    <!-- Pages list -->
-    <div class="pages-section">
-        <h2>📄 All published pages (real‑time)</h2>
-        <div class="pages-grid" id="pagesGrid">
-            <div class="shimmer"></div><div class="shimmer"></div><div class="shimmer"></div>
-        </div>
-    </div>
+<div id="hud-top">
+  <div id="day-badge">DAY 1</div>
+  <div id="clock-bar-wrap"><div id="clock-bar"></div></div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, serverTimestamp, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
-    import {
-        getAuth,
-        signInWithPopup, GoogleAuthProvider,
-        signInWithEmailAndPassword, createUserWithEmailAndPassword,
-        signOut, onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+<div id="hud-bottom-left">
+  <div class="stat-row"><div class="stat-icon">&#10084;</div><div class="stat-bar-wrap"><div class="stat-bar" id="health-bar"></div></div></div>
+  <div class="stat-row"><div class="stat-icon">&#127831;</div><div class="stat-bar-wrap"><div class="stat-bar" id="hunger-bar"></div></div></div>
+  <div class="stat-row"><div class="stat-icon">&#9889;</div><div class="stat-bar-wrap"><div class="stat-bar" id="stamina-bar"></div></div></div>
+</div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDFHskUWiyHhZke3KT9kkOtFI_gPsKfiGo",
-        authDomain: "itzhoyoo-f9f7e.firebaseapp.com",
-        databaseURL: "https://itzhoyoo-f9f7e-default-rtdb.firebaseio.com",
-        projectId: "itzhoyoo-f9f7e",
-        storageBucket: "itzhoyoo-f9f7e.filestorage.app",
-        messagingSenderId: "1094792075584",
-        appId: "1:1094792075584:web:d49e9c3f899d3cd31082a5",
-        measurementId: "G-LLT6F9WRKH"
-    };
+<div id="msg-log"></div>
+<div id="build-hint">LEFT CLICK: BREAK &nbsp;|&nbsp; RIGHT CLICK: PLACE &nbsp;|&nbsp; 1-6: SELECT BLOCK &nbsp;|&nbsp; E: EAT</div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+<div id="hotbar">
+  <div class="slot active" data-slot="0"><span class="key">1</span>&#129717;<span class="count" id="cnt-0">0</span></div>
+  <div class="slot" data-slot="1"><span class="key">2</span>&#129680;<span class="count" id="cnt-1">0</span></div>
+  <div class="slot" data-slot="2"><span class="key">3</span>&#127958;&#65039;<span class="count" id="cnt-2">0</span></div>
+  <div class="slot" data-slot="3"><span class="key">4</span>&#127793;<span class="count" id="cnt-3">0</span></div>
+  <div class="slot" data-slot="4"><span class="key">5</span>&#128266;<span class="count" id="cnt-4">0</span></div>
+  <div class="slot" data-slot="5"><span class="key">6</span>&#127822;<span class="count" id="cnt-5">0</span></div>
+</div>
 
-    let currentUser = null;
-    let isPremium = false;
+<div id="pointer-hint"><span>CLICK TO RESUME</span></div>
 
-    // Premium check
-    async function checkPremium(user) {
-        if (!user) { isPremium = false; return; }
-        const userRef = ref(db, `users/${user.uid}/premium`);
-        const snapshot = await get(userRef);
-        isPremium = snapshot.exists() ? snapshot.val() === true : false;
-        updatePremiumUI();
-    }
-    function updatePremiumUI() {
-        const badge = document.getElementById('premiumBadge');
-        const upgradeBtn = document.getElementById('upgradeBtn');
-        if (currentUser) {
-            if (isPremium) {
-                badge.style.display = 'inline-block';
-                upgradeBtn.style.display = 'none';
-            } else {
-                badge.style.display = 'none';
-                upgradeBtn.style.display = 'inline-block';
-            }
-        } else {
-            badge.style.display = 'none';
-            upgradeBtn.style.display = 'none';
-        }
-    }
-    window.upgradeToPremium = async () => {
-        if (!currentUser) return alert('Sign in first.');
-        await set(ref(db, `users/${currentUser.uid}/premium`), true);
-        isPremium = true;
-        updatePremiumUI();
-        alert('🎉 You are now Premium! Refresh to see pages instantly.');
-        loadAllPages();
-    };
+<div id="start-screen">
+  <h1>DAY 100</h1>
+  <div class="sub">FLOATING ISLAND SURVIVAL</div>
+  <div class="desc">
+    Your ship went down. All that's left is a single maple tree, rooted to a shard of
+    earth, drifting somewhere above the clouds. Chop, mine, build, and hold on —
+    survive one hundred sunrises and see if anything comes to rescue you.
+  </div>
+  <button id="start-btn">BEGIN DAY 1</button>
+  <div id="controls-grid">
+    <div><b>WASD</b> move</div>
+    <div><b>MOUSE</b> look</div>
+    <div><b>SPACE</b> jump</div>
+    <div><b>SHIFT</b> sprint</div>
+    <div><b>LEFT CLICK</b> break block</div>
+    <div><b>RIGHT CLICK</b> place block</div>
+    <div><b>1-6</b> select block</div>
+    <div><b>E</b> eat food</div>
+  </div>
+  <div id="loading-note">loading world…</div>
+</div>
 
-    function updateUI(user) {
-        currentUser = user;
-        const userInfo = document.getElementById('userInfo');
-        const authForms = document.getElementById('authForms');
-        if (user) {
-            userInfo.style.display = 'flex';
-            authForms.style.display = 'none';
-            document.getElementById('userEmailDisplay').textContent = user.email || user.displayName || 'User';
-            document.getElementById('userAvatar').src = user.photoURL ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'U')}&background=3a7bd5&color=fff&size=36`;
-            checkPremium(user);
-        } else {
-            userInfo.style.display = 'none';
-            authForms.style.display = 'flex';
-            isPremium = false;
-        }
-        document.getElementById('emailInput').value = '';
-        document.getElementById('passwordInput').value = '';
-    }
+<div id="end-screen">
+  <h1 id="end-title">YOU DIED</h1>
+  <p id="end-desc">The island claimed another.</p>
+  <button id="restart-btn">TRY AGAIN</button>
+</div>
 
-    onAuthStateChanged(auth, updateUI);
-
-    // Auth functions
-    window.signInWithGoogle = async () => {
-        const provider = new GoogleAuthProvider();
-        try { await signInWithPopup(auth, provider); } catch (err) { alert('Google sign in failed: ' + err.message); }
-    };
-    window.signUpWithEmail = async () => {
-        const email = document.getElementById('emailInput').value.trim();
-        const password = document.getElementById('passwordInput').value;
-        if (!email || !password) return alert('Enter email and password.');
-        try { await createUserWithEmailAndPassword(auth, email, password); } catch (err) { alert('Sign up failed: ' + err.message); }
-    };
-    window.signInWithEmail = async () => {
-        const email = document.getElementById('emailInput').value.trim();
-        const password = document.getElementById('passwordInput').value;
-        if (!email || !password) return alert('Enter email and password.');
-        try { await signInWithEmailAndPassword(auth, email, password); } catch (err) { alert('Login failed: ' + err.message); }
-    };
-    window.signOutUser = async () => {
-        try { await signOut(auth); } catch (err) { console.error('Sign out error:', err); }
-    };
-
-    // File upload: read HTML file and populate textarea
-    document.getElementById('htmlFileInput').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        const display = document.getElementById('fileNameDisplay');
-        if (!file) {
-            display.textContent = '';
-            return;
-        }
-        display.textContent = file.name;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            document.getElementById('htmlInput').value = ev.target.result;
-            display.textContent = file.name + ' (loaded)';
-        };
-        reader.onerror = () => {
-            alert('Failed to read file.');
-            display.textContent = '';
-        };
-        reader.readAsText(file);
-    });
-
-    // Upload function (unchanged logic)
-    window.uploadAndStore = async () => {
-        const htmlInput = document.getElementById('htmlInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const uploadStatus = document.getElementById('uploadStatus');
-        const html = htmlInput.value.trim();
-        if (!html) { uploadStatus.innerHTML = '<span class="status-error">❌ Please enter HTML code or select a file.</span>'; return; }
-        if (!currentUser) { uploadStatus.innerHTML = '<span class="status-error">❌ Please sign in first.</span>'; return; }
-        uploadBtn.disabled = true;
-        uploadStatus.innerHTML = '<span class="status-loading">⏳ Uploading to Supabase...</span>';
-        try {
-            const response = await fetch('/api/storage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ html })
-            });
-            const data = await response.json();
-            if (!response.ok || data.error) throw new Error(data.error || 'Upload failed');
-            const publicUrl = data.url;
-            uploadStatus.innerHTML = '<span class="status-loading">✅ Uploaded! Saving to Firebase...</span>';
-            await push(ref(db, 'pages'), {
-                url: publicUrl,
-                userId: currentUser.uid,
-                userName: currentUser.displayName || currentUser.email || 'Anonymous',
-                userPhoto: currentUser.photoURL || null,
-                createdAt: serverTimestamp()
-            });
-            uploadStatus.innerHTML = '<span class="status-success">🎉 Published! Visible worldwide.</span>';
-            htmlInput.value = '';
-            document.getElementById('fileNameDisplay').textContent = '';
-        } catch (err) {
-            console.error('Upload error:', err);
-            uploadStatus.innerHTML = `<span class="status-error">❌ Error: ${err.message}</span>`;
-        } finally {
-            uploadBtn.disabled = false;
-        }
-    };
-
-    // Page card with ads/countdown (exactly as before, unchanged)
-    function createPageCard(pageData, isUserPremium) {
-        const card = document.createElement('div');
-        card.className = 'page-card';
-
-        const adTop = document.createElement('div');
-        adTop.className = 'ad-slot ad-top';
-        adTop.textContent = 'Ad Slot 1';
-
-        const adBottom = document.createElement('div');
-        adBottom.className = 'ad-slot ad-bottom';
-        adBottom.textContent = 'Ad Slot 2';
-
-        const timerContainer = document.createElement('div');
-        timerContainer.className = 'countdown-container';
-        const timerText = document.createElement('div');
-        timerText.className = 'timer-text';
-        const skipBtn = document.createElement('button');
-        skipBtn.className = 'skip-btn';
-        skipBtn.textContent = 'Skip & Upgrade';
-        skipBtn.onclick = () => window.upgradeToPremium();
-        timerContainer.appendChild(timerText);
-        timerContainer.appendChild(skipBtn);
-
-        const iframe = document.createElement('iframe');
-        iframe.src = '';
-        iframe.sandbox = 'allow-scripts';
-        iframe.loading = 'lazy';
-        iframe.style.display = 'none';
-
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'page-card-info';
-        infoDiv.innerHTML = `
-            <div class="user">
-                <img src="${pageData.userPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(pageData.userName || 'U') + '&background=3a7bd5&color=fff&size=24'}" 
-                     alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=3a7bd5&color=fff&size=24'">
-                <span>${escapeHtml(pageData.userName || 'Anonymous')}</span>
-            </div>
-            <a href="${escapeHtml(pageData.url)}" target="_blank" rel="noopener">🔗 Open full page</a>
-        `;
-
-        card.appendChild(adTop);
-        card.appendChild(timerContainer);
-        card.appendChild(adBottom);
-        card.appendChild(iframe);
-        card.appendChild(infoDiv);
-
-        if (isUserPremium) {
-            adTop.style.display = 'none';
-            adBottom.style.display = 'none';
-            timerContainer.style.display = 'none';
-            iframe.src = pageData.url;
-            iframe.style.display = 'block';
-            return card;
-        }
-
-        let countdown = 10;
-        let timerInterval = null;
-        let isVisible = false;
-        let finished = false;
-        timerText.textContent = `Loading in ${countdown}s...`;
-        iframe.src = pageData.url;
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                isVisible = entry.isIntersecting;
-                if (isVisible && !finished && countdown > 0) startTimer();
-                else stopTimer();
-            });
-        }, { threshold: 0.1 });
-        observer.observe(card);
-
-        function startTimer() {
-            if (timerInterval) return;
-            timerInterval = setInterval(() => {
-                countdown--;
-                if (countdown <= 0) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    finished = true;
-                    adTop.style.display = 'none';
-                    adBottom.style.display = 'none';
-                    timerContainer.style.display = 'none';
-                    iframe.style.display = 'block';
-                } else {
-                    timerText.textContent = `Loading in ${countdown}s...`;
-                }
-            }, 1000);
-        }
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
-        card._observer = observer;
-        card._stopTimer = stopTimer;
-        return card;
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-    }
-
-    function loadAllPages() {
-        const pagesGrid = document.getElementById('pagesGrid');
-        pagesGrid.querySelectorAll('.page-card').forEach(card => {
-            if (card._observer) card._observer.disconnect();
-            if (card._stopTimer) card._stopTimer();
-        });
-        onValue(ref(db, 'pages'), (snapshot) => {
-            const data = snapshot.val();
-            pagesGrid.innerHTML = '';
-            if (!data) {
-                pagesGrid.innerHTML = '<div class="empty-state">📭 No pages yet. Be the first to publish one!</div>';
-                return;
-            }
-            const pages = Object.entries(data).reverse();
-            pages.forEach(([key, page]) => {
-                pagesGrid.appendChild(createPageCard(page, isPremium));
-            });
-        }, (err) => {
-            console.error('Firebase read error:', err);
-            pagesGrid.innerHTML = '<div class="empty-state">⚠️ Failed to load pages.</div>';
-        });
-    }
-
-    loadAllPages();
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js"></script>
+<script src="tree_data.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
